@@ -76,6 +76,7 @@ id, userId, title, body
 ## Prerequisites
 - **Python:** 3.10 or higher  
 - **Dependencies:** (in `requirements.txt`)
+- **Docker:** Installed and running (for PostgreSQL option)
 
 
 ## Setup Instructions
@@ -95,9 +96,15 @@ pip install -r requirements.txt
 The pipeline can be run in full or by individual stages (extract, transform, load, analytics).
 
 ### Full Pipeline
+- With SQLite (default):
 ```bash
-python main.py --stage full --api-url https://jsonplaceholder.typicode.com --db-path local.db --data-dir data
+python main.py
 ```
+- With PostgreSQL (via Docker):
+```bash
+python main.py --stage full --api-url https://jsonplaceholder.typicode.com --use-postgre --data-dir data
+```
+
 ### Individual Stages
 
 #### Extract: Fetches data from API and saves to data/raw/yyyy-mm-dd/.
@@ -129,6 +136,7 @@ python main.py --stage analytics
 - `--api-url`: API base URL. Default: `https://jsonplaceholder.typicode.com`.  
 - `--db-path`: Path to SQLite database. Default: `local.db`.  
 - `--data-dir`: Directory for data storage. Default: `data`.
+- `--use-postgre`: Use Docker Compose to run PostgreSQL instead of SQLite. Default: false.
 
 ---
 ## Output
@@ -139,7 +147,9 @@ python main.py --stage analytics
 - **Processed Data:** Parquet files in `data/processed/yyyy-mm-dd/`  
   (e.g., `users.parquet`, `posts.parquet`)  
 
-- **Database:** SQLite database (`local.db`) with tables `users` and `posts`  
+- **Database:** 
+  - SQLite database (`local.db`) with tables `users` and `posts`  
+  - PostgreSQL: Managed via Docker
 
 - **Reports:**
   - **JSON:** `reports/summary_report_YYYYMMDD_HHMMSS.json` with analytics results  

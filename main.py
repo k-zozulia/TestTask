@@ -2,6 +2,10 @@ import sys
 import argparse
 from pathlib import Path
 from datetime import datetime
+import subprocess
+import time
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
 
 sys.path.append(str(Path(__file__).parent / "src"))
 
@@ -18,21 +22,21 @@ class DataPipeline:
     """Main class for managing data pipeline"""
 
     def __init__(
-        self,
-        api_url: str = "https://jsonplaceholder.typicode.com",
-        db_path: str = "local.db",
-        data_dir: str = "data",
+            self,
+            api_url: str = "https://jsonplaceholder.typicode.com",
+            db_conn_str: str = "sqlite:///local.db",
+            data_dir: str = "data",
     ):
         self.api_url = api_url
-        self.db_path = db_path
+        self.db_conn_str = db_conn_str
         self.data_dir = data_dir
 
         self.extractor = DataExtractor(api_url, data_dir)
         self.transformer = DataTransformer(data_dir)
-        self.loader = DatabaseLoader(db_path, data_dir)
-        self.analytics = DataAnalytics(db_path)
+        self.loader = DatabaseLoader(db_conn_str, data_dir)
+        self.analytics = DataAnalytics(db_conn_str)
 
-        logger.info(f"Pipeline initialized: API={api_url}, DB={db_path}")
+        logger.info(f"Pipeline initialized: API={api_url}, DB={db_conn_str}")
 
     def run_extract(self) -> dict:
         """Extract data stage"""
@@ -228,13 +232,41 @@ def main():
         default="https://jsonplaceholder.typicode.com",
         help="API URL for data extraction",
     )
-    parser.add_argument("--db-path", default="local.db", help="Path to database file")
+    parser.add_argument("--db-path", default="local.db",
+                        help="Path to SQLite database file (ignored if --use-postgre)")
+    parser.add_argument("--use-postgre", action="store_true",
+                        help="Use Docker Compose to run PostgreSQL instead of SQLite")
     parser.add_argument("--data-dir", default="data", help="Directory for storing data")
 
     args = parser.parse_args()
 
+    if args.use_postgre:
+        try:
+            logger.info("Starting Docker Compose for PostgreSQL...")
+            subprocess.run(["docker-compose", "up", "-d"], check=True)
+
+            db_conn_str = "postgresql://user:pass@localhost:5433/mydb"
+            max_retries = 10
+            for attempt in range(max_retries):
+                try:
+                    engine = create_engine(db_conn_str)
+                    with engine.connect() as conn:
+                        conn.execute(text("SELECT 1"))
+                    logger.info("PostgreSQL is ready!")
+                    break
+                except OperationalError:
+                    logger.info(f"Waiting for PostgreSQL... Attempt {attempt + 1}/{max_retries}")
+                    time.sleep(3)
+            else:
+                raise RuntimeError("PostgreSQL did not start in time")
+        except Exception as e:
+            logger.error(f"Failed to start Docker Compose: {e}")
+            sys.exit(1)
+    else:
+        db_conn_str = f"sqlite:///{args.db_path}"
+
     pipeline = DataPipeline(
-        api_url=args.api_url, db_path=args.db_path, data_dir=args.data_dir
+        api_url=args.api_url, db_conn_str=db_conn_str, data_dir=args.data_dir
     )
 
     try:

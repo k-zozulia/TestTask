@@ -11,9 +11,9 @@ logger = setup_logging(log_file=Path(__file__).parent.parent / "logs" / "pipelin
 class DataAnalytics:
     """Class for running analytics queries and generating reports."""
 
-    def __init__(self, db_path: str = "local.db", reports_dir: str = "reports"):
-        self.db_path = db_path
-        self.engine = create_engine(f"sqlite:///{db_path}")
+    def __init__(self, db_conn_str: str = "sqlite:///local.db", reports_dir: str = "reports"):
+        self.db_conn_str = db_conn_str
+        self.engine = create_engine(self.db_conn_str)
         self.reports_dir = Path(__file__).parent.parent / reports_dir
         self.reports_dir.mkdir(exist_ok=True)
 
@@ -37,7 +37,7 @@ class DataAnalytics:
         query = """
                 SELECT COUNT(*)                                        as total_users,
                        COUNT(DISTINCT email_domain)                    as unique_domains,
-                       COUNT(CASE WHEN has_coordinates = 1 THEN 1 END) as users_with_coordinates,
+                       COUNT(CASE WHEN CAST(has_coordinates AS INTEGER) = 1 THEN 1 END) as users_with_coordinates,
                        COUNT(CASE WHEN company_name != '' THEN 1 END)  as users_with_company
                 FROM users
                 """
@@ -83,7 +83,7 @@ class DataAnalytics:
 
         report = {
             "generated_at": datetime.now().isoformat(),
-            "database": self.db_path,
+            "database": self.db_conn_str,
             "analytics": {},
         }
 

@@ -83,11 +83,11 @@ class Post(Base):
 class DatabaseLoader:
     """Class for managing database loading"""
 
-    def __init__(self, db_path: str = "local.db", data_dir: str = "data"):
-        self.db_path = Path(__file__).parent.parent / db_path
+    def __init__(self, db_conn_str: str = "sqlite:///local.db", data_dir: str = "data"):
+        self.db_conn_str = db_conn_str
         self.data_dir = Path(__file__).parent.parent / data_dir
         self.processed_dir = self.data_dir / "processed"
-        self.engine = create_engine(f"sqlite:///{self.db_path}")
+        self.engine = create_engine(self.db_conn_str)
         self.Session = sessionmaker(bind=self.engine)
 
     def create_tables(self):
