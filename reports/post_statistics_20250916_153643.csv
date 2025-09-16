@@ -1,0 +1,2 @@
+total_posts,unique_authors,avg_title_length,avg_body_length,avg_word_count,max_body_length,min_body_length
+100,10,39.52,160.64,23.85,225,102

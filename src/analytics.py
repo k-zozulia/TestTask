@@ -3,23 +3,18 @@ import json
 from datetime import datetime
 from pathlib import Path
 from sqlalchemy import create_engine
-import logging
+from logger_config import setup_logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging(log_file=Path(__file__).parent.parent / "logs" / "pipeline.log")
 
 
 class DataAnalytics:
     """Class for running analytics queries and generating reports."""
 
-    def __init__(self, db_path: str = "local.db"):
+    def __init__(self, db_path: str = "local.db", reports_dir: str = "reports"):
         self.db_path = db_path
         self.engine = create_engine(f"sqlite:///{db_path}")
-        self.reports_dir = Path("reports")
+        self.reports_dir = Path(__file__).parent.parent / reports_dir
         self.reports_dir.mkdir(exist_ok=True)
 
     def execute_query(self, query: str, query_name: str = "") -> pd.DataFrame:
@@ -89,22 +84,22 @@ class DataAnalytics:
         report = {
             "generated_at": datetime.now().isoformat(),
             "database": self.db_path,
-            "analytics": {}
+            "analytics": {},
         }
 
         analytics_functions = [
             ("user_statistics", self.user_statistics),
             ("post_statistics", self.post_statistics),
-            ("user_post_activity", self.user_post_activity)
+            ("user_post_activity", self.user_post_activity),
         ]
 
         for name, func in analytics_functions:
             try:
                 df = func()
                 report["analytics"][name] = {
-                    "data": df.to_dict('records'),
+                    "data": df.to_dict("records"),
                     "record_count": len(df),
-                    "columns": df.columns.tolist()
+                    "columns": df.columns.tolist(),
                 }
 
             except Exception as e:
@@ -112,7 +107,7 @@ class DataAnalytics:
                 report["analytics"][name] = {
                     "error": str(e),
                     "data": [],
-                    "record_count": 0
+                    "record_count": 0,
                 }
 
         return report
@@ -129,7 +124,7 @@ class DataAnalytics:
                 filename = f"{analysis_name}_{timestamp}.csv"
                 file_path = self.reports_dir / filename
 
-                df.to_csv(file_path, index=False, encoding='utf-8')
+                df.to_csv(file_path, index=False, encoding="utf-8")
                 saved_files.append(file_path)
                 logger.info(f"CSV saved: {file_path}")
 
@@ -142,7 +137,7 @@ class DataAnalytics:
         filename = f"summary_report_{timestamp}.json"
         file_path = self.reports_dir / filename
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2, default=str)
 
         logger.info(f"JSON report saved: {file_path}")
@@ -163,10 +158,12 @@ class DataAnalytics:
             "json_report": str(json_file),
             "csv_files": [str(f) for f in csv_files],
             "queries_executed": list(report["analytics"].keys()),
-            "total_csv_files": len(csv_files)
+            "total_csv_files": len(csv_files),
         }
 
-        logger.info(f"Analytics completed. Generated {len(csv_files)} CSV files and 1 JSON report.")
+        logger.info(
+            f"Analytics completed. Generated {len(csv_files)} CSV files and 1 JSON report."
+        )
         return result
 
 

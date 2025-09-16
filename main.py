@@ -2,7 +2,6 @@ import sys
 import argparse
 from pathlib import Path
 from datetime import datetime
-import logging
 
 sys.path.append(str(Path(__file__).parent / "src"))
 
@@ -10,22 +9,20 @@ from src.extract import DataExtractor
 from src.transform import DataTransformer
 from src.load import DatabaseLoader
 from src.analytics import DataAnalytics
+from src.logger_config import setup_logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pipeline.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging(log_file=Path(__file__).parent / "logs" / "pipeline.log")
+
 
 class DataPipeline:
     """Main class for managing data pipeline"""
 
-    def __init__(self, api_url: str = "https://jsonplaceholder.typicode.com",
-                 db_path: str = "local.db", data_dir: str = "data"):
+    def __init__(
+        self,
+        api_url: str = "https://jsonplaceholder.typicode.com",
+        db_path: str = "local.db",
+        data_dir: str = "data",
+    ):
         self.api_url = api_url
         self.db_path = db_path
         self.data_dir = data_dir
@@ -45,21 +42,27 @@ class DataPipeline:
         results = {}
 
         try:
-            users_data = self.extractor.extract_and_save("/users", filename="users.json")
+            users_data = self.extractor.extract_and_save(
+                "/users", filename="users.json"
+            )
             results["users"] = {
                 "success": True,
                 "count": len(users_data),
-                "data": users_data
+                "data": users_data,
             }
 
-            posts_data = self.extractor.extract_and_save("/posts", filename="posts.json")
+            posts_data = self.extractor.extract_and_save(
+                "/posts", filename="posts.json"
+            )
             results["posts"] = {
                 "success": True,
                 "count": len(posts_data),
-                "data": posts_data
+                "data": posts_data,
             }
 
-            logger.info(f"Extraction completed: {len(users_data)} users, {len(posts_data)} posts")
+            logger.info(
+                f"Extraction completed: {len(users_data)} users, {len(posts_data)} posts"
+            )
 
         except Exception as e:
             logger.error(f"Error during extraction: {e}")
@@ -76,21 +79,27 @@ class DataPipeline:
         results = {}
 
         try:
-            users_df = self.transformer.process_data("users.json", "users.parquet", "users")
+            users_df = self.transformer.process_data(
+                "users.json", "users.parquet", "users"
+            )
             results["users"] = {
                 "success": True,
                 "count": len(users_df),
-                "columns": users_df.columns.tolist()
+                "columns": users_df.columns.tolist(),
             }
 
-            posts_df = self.transformer.process_data("posts.json", "posts.parquet", "posts")
+            posts_df = self.transformer.process_data(
+                "posts.json", "posts.parquet", "posts"
+            )
             results["posts"] = {
                 "success": True,
                 "count": len(posts_df),
-                "columns": posts_df.columns.tolist()
+                "columns": posts_df.columns.tolist(),
             }
 
-            logger.info(f"Transformation completed: {len(users_df)} users, {len(posts_df)} posts")
+            logger.info(
+                f"Transformation completed: {len(users_df)} users, {len(posts_df)} posts"
+            )
 
         except Exception as e:
             logger.error(f"Error during transformation: {e}")
@@ -107,7 +116,9 @@ class DataPipeline:
         try:
             results = self.loader.load_all_data()
 
-            total_records = sum(r.get("count", 0) for r in results.values() if "error" not in r)
+            total_records = sum(
+                r.get("count", 0) for r in results.values() if "error" not in r
+            )
             logger.info(f"Loading completed: {total_records} records in total")
 
             return results
@@ -122,12 +133,14 @@ class DataPipeline:
         logger.info("=== STAGE 4: ANALYTICS AND REPORTS ===")
 
         try:
-            results = self.analytics.run_full_analytics()
+            results = self.analytics.run_analytics()
 
             logger.info("Analytics completed:")
-            logger.info(f"  - Full report: {results['full_report_path']}")
-            logger.info(f"  - CSV reports: {len(results['csv_reports'])} files")
-            logger.info(f"  - Summary report: {results['summary_report_path']}")
+            logger.info(f"  - JSON report: {results['json_report']}")
+            logger.info(f"  - CSV files: {results['total_csv_files']} files generated")
+            logger.info(
+                f"  - Queries executed: {', '.join(results['queries_executed'])}"
+            )
 
             return results
 
@@ -141,10 +154,7 @@ class DataPipeline:
         logger.info("STARTING FULL DATA PIPELINE")
         start_time = datetime.now()
 
-        pipeline_results = {
-            "start_time": start_time.isoformat(),
-            "stages": {}
-        }
+        pipeline_results = {"start_time": start_time.isoformat(), "stages": {}}
 
         try:
             # Stage 1: Extract
@@ -167,7 +177,9 @@ class DataPipeline:
             pipeline_results["duration_seconds"] = duration.total_seconds()
             pipeline_results["success"] = True
 
-            logger.info(f"PIPELINE SUCCESSFULLY COMPLETED in {duration.total_seconds():.2f} seconds")
+            logger.info(
+                f"PIPELINE SUCCESSFULLY COMPLETED in {duration.total_seconds():.2f} seconds"
+            )
 
         except Exception as e:
             end_time = datetime.now()
@@ -189,11 +201,13 @@ class DataPipeline:
             "extract": self.run_extract,
             "transform": self.run_transform,
             "load": self.run_load,
-            "analytics": self.run_analytics
+            "analytics": self.run_analytics,
         }
 
         if stage not in stages:
-            raise ValueError(f"Unknown stage: {stage}. Available: {list(stages.keys())}")
+            raise ValueError(
+                f"Unknown stage: {stage}. Available: {list(stages.keys())}"
+            )
 
         logger.info(f"Running stage: {stage}")
         return stages[stage]()
@@ -201,17 +215,11 @@ class DataPipeline:
 
 def create_project_structure():
     """Create the base project structure"""
-    directories = [
-        "src",
-        "data/raw",
-        "data/processed",
-        "reports"
-    ]
+    directories = ["src", "data/raw", "data/processed", "reports"]
 
     for directory in directories:
         Path(directory).mkdir(parents=True, exist_ok=True)
 
-    # Create __init__.py for src
     (Path("src") / "__init__.py").touch()
 
     logger.info("Project structure created")
@@ -221,16 +229,20 @@ def main():
     """Main function with command-line arguments"""
 
     parser = argparse.ArgumentParser(description="Data Pipeline")
-    parser.add_argument("--stage", choices=["extract", "transform", "load", "analytics", "full"],
-                        default="full", help="Stage to run")
-    parser.add_argument("--api-url", default="https://jsonplaceholder.typicode.com",
-                        help="API URL for data extraction")
-    parser.add_argument("--db-path", default="local.db",
-                        help="Path to database file")
-    parser.add_argument("--data-dir", default="data",
-                        help="Directory for storing data")
-    parser.add_argument("--setup", action="store_true",
-                        help="Create project structure")
+    parser.add_argument(
+        "--stage",
+        choices=["extract", "transform", "load", "analytics", "full"],
+        default="full",
+        help="Stage to run",
+    )
+    parser.add_argument(
+        "--api-url",
+        default="https://jsonplaceholder.typicode.com",
+        help="API URL for data extraction",
+    )
+    parser.add_argument("--db-path", default="local.db", help="Path to database file")
+    parser.add_argument("--data-dir", default="data", help="Directory for storing data")
+    parser.add_argument("--setup", action="store_true", help="Create project structure")
 
     args = parser.parse_args()
 
@@ -239,9 +251,7 @@ def main():
         return
 
     pipeline = DataPipeline(
-        api_url=args.api_url,
-        db_path=args.db_path,
-        data_dir=args.data_dir
+        api_url=args.api_url, db_path=args.db_path, data_dir=args.data_dir
     )
 
     try:
@@ -279,4 +289,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

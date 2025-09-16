@@ -1,0 +1,150 @@
+{
+  "generated_at": "2025-09-16T15:36:43.737858",
+  "database": "local.db",
+  "analytics": {
+    "user_statistics": {
+      "data": [
+        {
+          "total_users": 10,
+          "unique_domains": 10,
+          "users_with_coordinates": 10,
+          "users_with_company": 10
+        }
+      ],
+      "record_count": 1,
+      "columns": [
+        "total_users",
+        "unique_domains",
+        "users_with_coordinates",
+        "users_with_company"
+      ]
+    },
+    "post_statistics": {
+      "data": [
+        {
+          "total_posts": 100,
+          "unique_authors": 10,
+          "avg_title_length": 39.52,
+          "avg_body_length": 160.64,
+          "avg_word_count": 23.85,
+          "max_body_length": 225,
+          "min_body_length": 102
+        }
+      ],
+      "record_count": 1,
+      "columns": [
+        "total_posts",
+        "unique_authors",
+        "avg_title_length",
+        "avg_body_length",
+        "avg_word_count",
+        "max_body_length",
+        "min_body_length"
+      ]
+    },
+    "user_post_activity": {
+      "data": [
+        {
+          "user_id": 1,
+          "username": "Bret",
+          "name": "Leanne Graham",
+          "email_domain": "april.biz",
+          "post_count": 10,
+          "avg_post_length": 25.4,
+          "max_post_length": 206
+        },
+        {
+          "user_id": 2,
+          "username": "Antonette",
+          "name": "Ervin Howell",
+          "email_domain": "melissa.tv",
+          "post_count": 10,
+          "avg_post_length": 24.0,
+          "max_post_length": 225
+        },
+        {
+          "user_id": 3,
+          "username": "Samantha",
+          "name": "Clementine Bauch",
+          "email_domain": "yesenia.net",
+          "post_count": 10,
+          "avg_post_length": 22.9,
+          "max_post_length": 190
+        },
+        {
+          "user_id": 4,
+          "username": "Karianne",
+          "name": "Patricia Lebsack",
+          "email_domain": "kory.org",
+          "post_count": 10,
+          "avg_post_length": 27.7,
+          "max_post_length": 212
+        },
+        {
+          "user_id": 5,
+          "username": "Kamren",
+          "name": "Chelsey Dietrich",
+          "email_domain": "annie.ca",
+          "post_count": 10,
+          "avg_post_length": 23.7,
+          "max_post_length": 193
+        },
+        {
+          "user_id": 6,
+          "username": "Leopoldo_Corkery",
+          "name": "Mrs. Dennis Schulist",
+          "email_domain": "jasper.info",
+          "post_count": 10,
+          "avg_post_length": 22.1,
+          "max_post_length": 197
+        },
+        {
+          "user_id": 7,
+          "username": "Elwyn.Skiles",
+          "name": "Kurtis Weissnat",
+          "email_domain": "billy.biz",
+          "post_count": 10,
+          "avg_post_length": 23.4,
+          "max_post_length": 218
+        },
+        {
+          "user_id": 8,
+          "username": "Maxime_Nienow",
+          "name": "Nicholas Runolfsdottir V",
+          "email_domain": "rosamond.me",
+          "post_count": 10,
+          "avg_post_length": 23.8,
+          "max_post_length": 196
+        },
+        {
+          "user_id": 9,
+          "username": "Delphine",
+          "name": "Glenna Reichert",
+          "email_domain": "dana.io",
+          "post_count": 10,
+          "avg_post_length": 22.3,
+          "max_post_length": 198
+        },
+        {
+          "user_id": 10,
+          "username": "Moriah.Stanton",
+          "name": "Clementina DuBuque",
+          "email_domain": "karina.biz",
+          "post_count": 10,
+          "avg_post_length": 23.2,
+          "max_post_length": 215
+        }
+      ],
+      "record_count": 10,
+      "columns": [
+        "user_id",
+        "username",
+        "name",
+        "email_domain",
+        "post_count",
+        "avg_post_length",
+        "max_post_length"
+      ]
+    }
+  }
+}

@@ -16,19 +16,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import logging
 import pyarrow.parquet as pq
+from logger_config import setup_logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging(log_file=Path(__file__).parent.parent / "logs" / "pipeline.log")
 
 Base = declarative_base()
 
-CLEANING_RULES = {
+LENGTH_RULES = {
     "users": {
         "username": 100,
         "name": 200,
@@ -89,10 +84,10 @@ class DatabaseLoader:
     """Class for managing database loading"""
 
     def __init__(self, db_path: str = "local.db", data_dir: str = "data"):
-        self.db_path = db_path
-        self.data_dir = Path(data_dir)
+        self.db_path = Path(__file__).parent.parent / db_path
+        self.data_dir = Path(__file__).parent.parent / data_dir
         self.processed_dir = self.data_dir / "processed"
-        self.engine = create_engine(f"sqlite:///{db_path}")
+        self.engine = create_engine(f"sqlite:///{self.db_path}")
         self.Session = sessionmaker(bind=self.engine)
 
     def create_tables(self):
@@ -132,8 +127,8 @@ class DatabaseLoader:
                 df_clean["created_at"], errors="coerce"
             )
 
-        if table_type in CLEANING_RULES:
-            for col, max_len in CLEANING_RULES[table_type].items():
+        if table_type in LENGTH_RULES:
+            for col, max_len in LENGTH_RULES[table_type].items():
                 if col in df_clean.columns and pd.api.types.is_string_dtype(
                     df_clean[col]
                 ):
@@ -233,7 +228,6 @@ def main():
     loader = DatabaseLoader()
 
     try:
-        # Load all processed data
         results = loader.load_all_data()
         print("Load results:")
         for table, stats in results.items():
@@ -242,11 +236,9 @@ def main():
             else:
                 print(f"  {table}: {stats['count']} rows")
 
-        # Print table info
         table_info = loader.get_table_info()
         print(f"\nTable info: {table_info}")
 
-        # Run test query
         test_query = "SELECT COUNT(*) as total_users FROM users"
         result = loader.execute_query(test_query)
         print(f"\nTest query: {result}")

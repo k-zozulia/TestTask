@@ -2,24 +2,18 @@ import json
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
-import logging
 import pyarrow as pa
 import pyarrow.parquet as pq
-from sqlalchemy import table
+from logger_config import setup_logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging(log_file=Path(__file__).parent.parent / "logs" / "pipeline.log")
 
 
 class DataTransformer:
     """Class for transforming and cleaning raw API data"""
 
     def __init__(self, data_dir: str = "data"):
-        self.data_dir = Path(data_dir)
+        self.data_dir = Path(__file__).parent.parent / data_dir
         self.raw_dir = self.data_dir / "raw"
         self.processed_dir = self.data_dir / "processed"
 
@@ -135,17 +129,6 @@ class DataTransformer:
         pq.write_table(table_data, file_path)
 
         logger.info(f"Saving {file_path} into parquet file")
-        return file_path
-
-    def save_to_csv(self, df: pd.DataFrame, filename: str) -> Path:
-        """Save dataframe to csv file"""
-
-        processed_dir = self.create_processed_directory()
-        file_path = processed_dir / filename
-
-        df.to_csv(file_path, index=False, encoding="utf-8")
-        logger.info(f"Saving {file_path} into csv file")
-
         return file_path
 
     def process_data(

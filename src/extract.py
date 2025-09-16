@@ -2,15 +2,9 @@ import json
 import requests
 from datetime import datetime
 from pathlib import Path
-import logging
+from logger_config import setup_logging
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging(log_file=Path(__file__).parent.parent / "logs" / "pipeline.log")
 
 
 class DataExtractor:
@@ -18,7 +12,7 @@ class DataExtractor:
 
     def __init__(self, base_url: str, data_dir: str = "data"):
         self.base_url = base_url
-        self.data_dir = Path(data_dir)
+        self.data_dir = Path(__file__).parent.parent / data_dir
         self.raw_dir = self.data_dir / "raw"
 
     def create_directories(self) -> Path:
