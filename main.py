@@ -213,18 +213,6 @@ class DataPipeline:
         return stages[stage]()
 
 
-def create_project_structure():
-    """Create the base project structure"""
-    directories = ["src", "data/raw", "data/processed", "reports"]
-
-    for directory in directories:
-        Path(directory).mkdir(parents=True, exist_ok=True)
-
-    (Path("src") / "__init__.py").touch()
-
-    logger.info("Project structure created")
-
-
 def main():
     """Main function with command-line arguments"""
 
@@ -242,13 +230,8 @@ def main():
     )
     parser.add_argument("--db-path", default="local.db", help="Path to database file")
     parser.add_argument("--data-dir", default="data", help="Directory for storing data")
-    parser.add_argument("--setup", action="store_true", help="Create project structure")
 
     args = parser.parse_args()
-
-    if args.setup:
-        create_project_structure()
-        return
 
     pipeline = DataPipeline(
         api_url=args.api_url, db_path=args.db_path, data_dir=args.data_dir

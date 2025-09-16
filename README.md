@@ -90,11 +90,6 @@ git clone https://github.com/k-zozulia/TestTask.git
 pip install -r requirements.txt
 ```
 
-### Create project structure (optional)
-```bash
-python main.py --setup
-```
-
 ## Running the Pipeline
 
 The pipeline can be run in full or by individual stages (extract, transform, load, analytics).
@@ -133,8 +128,7 @@ python main.py --stage analytics
 - `--stage`: Pipeline stage to run (`extract`, `transform`, `load`, `analytics`, `full`). Default: `full`.  
 - `--api-url`: API base URL. Default: `https://jsonplaceholder.typicode.com`.  
 - `--db-path`: Path to SQLite database. Default: `local.db`.  
-- `--data-dir`: Directory for data storage. Default: `data`.  
-- `--setup`: Create project directory structure (no pipeline execution).  
+- `--data-dir`: Directory for data storage. Default: `data`.
 
 ---
 ## Output
