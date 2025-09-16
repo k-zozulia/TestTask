@@ -22,10 +22,10 @@ class DataPipeline:
     """Main class for managing data pipeline"""
 
     def __init__(
-            self,
-            api_url: str = "https://jsonplaceholder.typicode.com",
-            db_conn_str: str = "sqlite:///local.db",
-            data_dir: str = "data",
+        self,
+        api_url: str = "https://jsonplaceholder.typicode.com",
+        db_conn_str: str = "sqlite:///local.db",
+        data_dir: str = "data",
     ):
         self.api_url = api_url
         self.db_conn_str = db_conn_str
@@ -232,10 +232,16 @@ def main():
         default="https://jsonplaceholder.typicode.com",
         help="API URL for data extraction",
     )
-    parser.add_argument("--db-path", default="local.db",
-                        help="Path to SQLite database file (ignored if --use-postgre)")
-    parser.add_argument("--use-postgre", action="store_true",
-                        help="Use Docker Compose to run PostgreSQL instead of SQLite")
+    parser.add_argument(
+        "--db-path",
+        default="local.db",
+        help="Path to SQLite database file (ignored if --use-postgre)",
+    )
+    parser.add_argument(
+        "--use-postgre",
+        action="store_true",
+        help="Use Docker Compose to run PostgreSQL instead of SQLite",
+    )
     parser.add_argument("--data-dir", default="data", help="Directory for storing data")
 
     args = parser.parse_args()
@@ -255,7 +261,9 @@ def main():
                     logger.info("PostgreSQL is ready!")
                     break
                 except OperationalError:
-                    logger.info(f"Waiting for PostgreSQL... Attempt {attempt + 1}/{max_retries}")
+                    logger.info(
+                        f"Waiting for PostgreSQL... Attempt {attempt + 1}/{max_retries}"
+                    )
                     time.sleep(3)
             else:
                 raise RuntimeError("PostgreSQL did not start in time")

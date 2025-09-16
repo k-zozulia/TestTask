@@ -11,7 +11,9 @@ logger = setup_logging(log_file=Path(__file__).parent.parent / "logs" / "pipelin
 class DataAnalytics:
     """Class for running analytics queries and generating reports."""
 
-    def __init__(self, db_conn_str: str = "sqlite:///local.db", reports_dir: str = "reports"):
+    def __init__(
+        self, db_conn_str: str = "sqlite:///local.db", reports_dir: str = "reports"
+    ):
         self.db_conn_str = db_conn_str
         self.engine = create_engine(self.db_conn_str)
         self.reports_dir = Path(__file__).parent.parent / reports_dir
